@@ -63,7 +63,7 @@ label {
 
 input[type="number"],
 input[type="text"] {
-  width: 12rem;
+  width: 10rem;
   height: 4rem;
   background-color: transparent;
   border: none;
@@ -81,13 +81,34 @@ input[type="number"] {
   margin-right: 3rem;
 }
 
-input[type="text"] {
-  margin-bottom: 1rem;
-}
-
 .input-group input[type="number"]::-webkit-outer-spin-button,
 .input-group input[type="number"]::-webkit-inner-spin-button {
   appearance: none;
+}
+
+.hex-input {
+  display: flex;
+  width: 20rem;
+  margin-left: 7rem;
+}
+
+.hex-input input {
+  flex: 2;
+  margin-bottom: 1rem;
+}
+
+.copy-btn {
+  flex: 1;
+  font-size: 1.2rem;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: #aeadc4;
+}
+
+.copy-btn:focus {
+  outline: none;
 }
 
 .color-preview {
@@ -125,8 +146,19 @@ input[type="text"] {
   }
   input[type="number"],
   input[type="text"] {
-    width: 10rem;
+    /* width: 9rem; */
     height: 3rem;
     font-size: 2rem;
+  }
+
+  .hex-input {
+    flex-direction: column;
+    align-items: center;
+    margin: auto;
+    margin-bottom: 1rem;
+  }
+
+  .hex-input input {
+    margin-bottom: 0.5rem;
   }
 }

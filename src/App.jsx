@@ -2,16 +2,21 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 const App = () => {
-  // const [rgb, setRgb] = useState({ r: 255, g: 103, b: 87 });
-  // const [hex, setHex] = useState('#ff6757');
-  // const [rgb, setRgb] = useState({ r: 166, g: 150, b: 221 });
-  // const [hex, setHex] = useState('#a696dd');
   const [rgb, setRgb] = useState({ r: 141, g: 182, b: 150 });
-  const [hex, setHex] = useState('#8DB696');
+  const [hex, setHex] = useState('#8db696');
+  const [copied, setCopied] = useState(false);
 
   const handleRgbChange = (e) => {
     const { name, value } = e.target;
-    setRgb({ ...rgb, [name]: Number(value) });
+
+    if (value === '') {
+      setRgb({ ...rgb, [name]: 0 });
+      return;
+    }
+
+    let num = Math.max(0, Math.min(255, Number(value)));
+
+    setRgb({ ...rgb, [name]: num.toString() });
   };
 
   const handleHexChange = (e) => {
@@ -19,10 +24,9 @@ const App = () => {
   };
 
   const rgbToHex = (r, g, b) => {
-    const clamp = (value) => Math.max(0, Math.min(255, value));
-    const red = clamp(r).toString(16).padStart(2, 0);
-    const green = clamp(g).toString(16).padStart(2, 0);
-    const blue = clamp(b).toString(16).padStart(2, 0);
+    const red = Number(r).toString(16).padStart(2, 0);
+    const green = Number(g).toString(16).padStart(2, 0);
+    const blue = Number(b).toString(16).padStart(2, 0);
 
     return `#${red}${green}${blue}`;
   };
@@ -34,6 +38,17 @@ const App = () => {
     const b = parseInt(hex.substring(4, 6), 16);
 
     return { r, g, b };
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(hex);
+      setCopied(true);
+
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
   };
 
   useEffect(() => {
@@ -90,7 +105,20 @@ const App = () => {
         </div>
         <div className="hex-section">
           <h2>HEX</h2>
-          <input type="text" maxLength="7" value={hex} onChange={handleHexChange} />
+          <div className="hex-input">
+            <input type="text" maxLength="7" value={hex} onChange={handleHexChange} />
+            <button className="copy-btn" onClick={handleCopy}>
+              {copied ? (
+                <>
+                  <i className="bx bx-copy"></i> Copied!
+                </>
+              ) : (
+                <>
+                  <i className="bx bx-copy"></i> Copy
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
       <div className="color-preview" style={{ backgroundColor: hex }}></div>
