@@ -1,0 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Lilita+One&family=Matemasie&display=swap");
+
+@import url(https://fonts.googleapis.com/css?family=Pacifico&family=Quicksand:300,regular,500,600,700);
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* font-family: "Lilita One", sans-serif; */
+  font-family: "Quicksand", sans-serif;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+@media (max-width: 550px) {
+  html {
+    font-size: 50%;
+  }
+}
