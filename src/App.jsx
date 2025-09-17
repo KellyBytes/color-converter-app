@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import './App.css';
+import './index.css';
+import './styles.css';
 
 const App = () => {
   const [rgb, setRgb] = useState({ r: 141, g: 182, b: 150 });
@@ -11,6 +12,7 @@ const App = () => {
     const { name, value } = e.target;
     let num = Math.max(0, Math.min(255, Number(value)));
     setRgb({ ...rgb, [name]: String(num) });
+    setPendingRgb({ ...rgb, [name]: String(num) });
   };
 
   // changes in range go into pendingRgb
@@ -75,16 +77,21 @@ const App = () => {
   }, [hex]);
 
   return (
-    <div className="app">
-      <div className="converter">
-        <h1>Color Converter</h1>
-        <div className="rgb-section">
-          <h2>RGB</h2>
-          <div className="input-groups">
-            <div className="input-group">
-              <label>R:</label>
-              <div className="inputs">
+    <div className="app w-full h-screen grid place-items-center text-gray-200 relative">
+      <div className="converter w-3/4 max-w-2xl lg:max-w-3xl h-2/3 lg:h-3/5 bg-gray-800 flex flex-col justify-center items-center gap-y-10 rounded-4xl shadow-xl/20">
+        <h1 className="exo px-5 text-3xl text-wrap text-center sm:text-5xl md:text-6xl lg:text-7xl text-gradient lg:mb-4">
+          Color Converter
+        </h1>
+        <div className="rgb-section flex flex-col items-center">
+          <h2 className="font-bold text-center text-2xl sm:text-3xl text-neutral-300 text-shadow-sm/30 text-shadow-neutral-100 mb-3">
+            RGB
+          </h2>
+          <div className="input-groups flex flex-col lg:flex-row">
+            <div className="input-group flex items-center gap-x-4">
+              <label className="text-lg sm:text-xl text-red-400">R:</label>
+              <div className="inputs flex flex-col justify-center mb-4 lg:mr-6">
                 <input
+                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-md sm:text-lg font-light -ml-2"
                   type="number"
                   name="r"
                   min="0"
@@ -94,6 +101,7 @@ const App = () => {
                   onWheel={(e) => e.currentTarget.blur()}
                 />
                 <input
+                  className="w-30"
                   type="range"
                   name="r"
                   min="0"
@@ -105,10 +113,11 @@ const App = () => {
                 />
               </div>
             </div>
-            <div className="input-group">
-              <label>G:</label>
-              <div className="inputs">
+            <div className="input-group flex items-center gap-x-4">
+              <label className="text-lg sm:text-xl text-green-400">G:</label>
+              <div className="inputs flex flex-col justify-center mb-4 lg:mr-6">
                 <input
+                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-md sm:text-lg font-light -ml-2"
                   type="number"
                   name="g"
                   min="0"
@@ -118,6 +127,7 @@ const App = () => {
                   onWheel={(e) => e.currentTarget.blur()}
                 />
                 <input
+                  className="w-30"
                   type="range"
                   name="g"
                   min="0"
@@ -129,10 +139,11 @@ const App = () => {
                 />
               </div>
             </div>
-            <div className="input-group">
-              <label>B:</label>
-              <div className="inputs">
+            <div className="input-group flex items-center gap-x-4">
+              <label className="text-lg sm:text-xl text-blue-400">B:</label>
+              <div className="inputs flex flex-col justify-center mb-4">
                 <input
+                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-md sm:text-lg font-light -ml-2"
                   type="number"
                   name="b"
                   min="0"
@@ -142,6 +153,7 @@ const App = () => {
                   onWheel={(e) => e.currentTarget.blur()}
                 />
                 <input
+                  className="w-30"
                   type="range"
                   name="b"
                   min="0"
@@ -156,29 +168,36 @@ const App = () => {
           </div>
         </div>
         <div className="hex-section">
-          <h2>HEX</h2>
-          <div className="hex-input">
+          <h2 className="text-center font-bold text-2xl sm:text-3xl text-neutral-300 text-shadow-sm/30 text-shadow-neutral-100 mb-3">
+            HEX
+          </h2>
+          <div className="hex-input flex justify-center relative">
             <input
+              className="w-32 lg:w-38  h-10 pl-4 font-light text-xl lg:text-2xl border-b-gray-500 border-b-3"
               type="text"
               maxLength="7"
               value={hex}
               onChange={handleHexChange}
             />
-            <button className="copy-btn" onClick={handleCopy}>
+            <button
+              className="copy-btn absolute right-0 top-0 bg-transparent cursor-pointer focus:outline-none active:outline-none"
+              onClick={handleCopy}
+            >
               {copied ? (
-                <>
-                  <i className="bx bx-copy"></i> Copied!
-                </>
+                <span className="text-xs text-gray-400 absolute -right-8">
+                  Copied!
+                </span>
               ) : (
-                <>
-                  <i className="bx bx-copy"></i> Copy
-                </>
+                <i className="bx bx-copy text-md text-gray-400"></i>
               )}
             </button>
           </div>
         </div>
       </div>
-      <div className="color-preview" style={{ backgroundColor: hex }}></div>
+      <div
+        className="color-preview w-full h-full absolute inset-0 -z-1 transition-colors duration-300 ease"
+        style={{ backgroundColor: hex }}
+      ></div>
     </div>
   );
 };
