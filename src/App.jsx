@@ -1,22 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 const App = () => {
   const [rgb, setRgb] = useState({ r: 141, g: 182, b: 150 });
   const [hex, setHex] = useState('#8db696');
   const [copied, setCopied] = useState(false);
+  const [pendingRgb, setPendingRgb] = useState(rgb);
 
-  const handleRgbChange = (e) => {
+  const handleRgbNumChange = (e) => {
     const { name, value } = e.target;
-
-    if (value === '') {
-      setRgb({ ...rgb, [name]: 0 });
-      return;
-    }
-
     let num = Math.max(0, Math.min(255, Number(value)));
+    setRgb({ ...rgb, [name]: String(num) });
+  };
 
-    setRgb({ ...rgb, [name]: num.toString() });
+  // changes in range go into pendingRgb
+  const handleRgbRangeChange = (e) => {
+    const { name, value } = e.target;
+    const num = Math.max(0, Math.min(255, Number(value) || 0));
+    setPendingRgb({ ...pendingRgb, [name]: num });
+  };
+
+  // set pendingRgb to rgb when dragging is complete
+  const commitRgbRangeChange = () => {
+    setRgb(pendingRgb);
   };
 
   const handleHexChange = (e) => {
@@ -52,12 +58,19 @@ const App = () => {
   };
 
   useEffect(() => {
-    setHex(rgbToHex(rgb.r, rgb.g, rgb.b));
+    const newHex = rgbToHex(rgb.r, rgb.g, rgb.b);
+    if (newHex !== hex) {
+      setHex(newHex);
+    }
   }, [rgb]);
 
   useEffect(() => {
     if (/^#[0-9A-Fa-f]{6}$/i.test(hex)) {
-      setRgb(hexToRgb(hex));
+      const newRgb = hexToRgb(hex);
+
+      if (newRgb.r !== rgb.r || newRgb.g !== rgb.g || newRgb.b !== rgb.b) {
+        setRgb(newRgb);
+      }
     }
   }, [hex]);
 
@@ -70,43 +83,87 @@ const App = () => {
           <div className="input-groups">
             <div className="input-group">
               <label>R:</label>
-              <input
-                type="number"
-                name="r"
-                min="0"
-                max="255"
-                value={rgb.r}
-                onChange={handleRgbChange}
-              />
+              <div className="inputs">
+                <input
+                  type="number"
+                  name="r"
+                  min="0"
+                  max="255"
+                  value={rgb.r}
+                  onChange={handleRgbNumChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                />
+                <input
+                  type="range"
+                  name="r"
+                  min="0"
+                  max="255"
+                  value={pendingRgb.r}
+                  onChange={handleRgbRangeChange}
+                  onMouseUp={commitRgbRangeChange}
+                  onTouchEnd={commitRgbRangeChange}
+                />
+              </div>
             </div>
             <div className="input-group">
               <label>G:</label>
-              <input
-                type="number"
-                name="g"
-                min="0"
-                max="255"
-                value={rgb.g}
-                onChange={handleRgbChange}
-              />
+              <div className="inputs">
+                <input
+                  type="number"
+                  name="g"
+                  min="0"
+                  max="255"
+                  value={rgb.g}
+                  onChange={handleRgbNumChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                />
+                <input
+                  type="range"
+                  name="g"
+                  min="0"
+                  max="255"
+                  value={pendingRgb.g}
+                  onChange={handleRgbRangeChange}
+                  onMouseUp={commitRgbRangeChange}
+                  onTouchEnd={commitRgbRangeChange}
+                />
+              </div>
             </div>
             <div className="input-group">
               <label>B:</label>
-              <input
-                type="number"
-                name="b"
-                min="0"
-                max="255"
-                value={rgb.b}
-                onChange={handleRgbChange}
-              />
+              <div className="inputs">
+                <input
+                  type="number"
+                  name="b"
+                  min="0"
+                  max="255"
+                  value={rgb.b}
+                  onChange={handleRgbNumChange}
+                  onWheel={(e) => e.currentTarget.blur()}
+                />
+                <input
+                  type="range"
+                  name="b"
+                  min="0"
+                  max="255"
+                  value={pendingRgb.b}
+                  onChange={handleRgbRangeChange}
+                  onMouseUp={commitRgbRangeChange}
+                  onTouchEnd={commitRgbRangeChange}
+                />
+              </div>
             </div>
           </div>
         </div>
         <div className="hex-section">
           <h2>HEX</h2>
           <div className="hex-input">
-            <input type="text" maxLength="7" value={hex} onChange={handleHexChange} />
+            <input
+              type="text"
+              maxLength="7"
+              value={hex}
+              onChange={handleHexChange}
+            />
             <button className="copy-btn" onClick={handleCopy}>
               {copied ? (
                 <>
