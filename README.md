@@ -32,4 +32,7 @@ Responsive Design
 <br />
 
 Copy HEX value
+
+<p>
 <img src="./public/images/color-converter-app-6.png" width="200"/>
+</p>
