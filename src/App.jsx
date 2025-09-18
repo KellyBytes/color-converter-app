@@ -1,40 +1,60 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './index.css';
 import './styles.css';
 
 const App = () => {
-  const [rgb, setRgb] = useState({ r: 141, g: 182, b: 150 });
-  const [hex, setHex] = useState('#8db696');
+  const [rgb, setRgb] = useState({ r: 141, g: 182, b: 226 });
+  const [hex, setHex] = useState('#8db6e2');
   const [copied, setCopied] = useState(false);
   const [pendingRgb, setPendingRgb] = useState(rgb);
+
+  function debounce(func, delay) {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  }
 
   const handleRgbNumChange = (e) => {
     const { name, value } = e.target;
     let num = Math.max(0, Math.min(255, Number(value)));
-    setRgb({ ...rgb, [name]: String(num) });
-    setPendingRgb({ ...rgb, [name]: String(num) });
+    setRgb((prev) => ({ ...prev, [name]: String(num) })); // remove ascending zeros
+    setPendingRgb((prev) => ({ ...prev, [name]: num }));
   };
 
-  // changes in range go into pendingRgb
-  const handleRgbRangeChange = (e) => {
+  const handleRangeImmediate = (e) => {
     const { name, value } = e.target;
-    const num = Math.max(0, Math.min(255, Number(value) || 0));
-    setPendingRgb({ ...pendingRgb, [name]: num });
+    const num = Math.max(0, Math.min(255, Number(value)));
+    setPendingRgb((prev) => ({ ...prev, [name]: num }));
   };
 
-  // set pendingRgb to rgb when dragging is complete
-  const commitRgbRangeChange = () => {
-    setRgb(pendingRgb);
-  };
+  const handleRangeDebounced = useCallback(
+    debounce((newRgb) => {
+      setRgb(newRgb);
+    }, 20),
+    []
+  );
 
   const handleHexChange = (e) => {
-    setHex(e.target.value);
+    let value = e.target.value.toUpperCase();
+
+    if (!value.startsWith('#')) {
+      value = '#' + value.replace(/[^0-9A-F]/gi, '');
+    } else {
+      value = '#' + value.slice(1).replace(/[^0-9A-F]/gi, '');
+    }
+
+    if (value.length > 7) {
+      value = value.slice(0, 7);
+    }
+    setHex(value);
   };
 
   const rgbToHex = (r, g, b) => {
-    const red = Number(r).toString(16).padStart(2, 0);
-    const green = Number(g).toString(16).padStart(2, 0);
-    const blue = Number(b).toString(16).padStart(2, 0);
+    const red = Number(r).toString(16).toUpperCase().padStart(2, '0');
+    const green = Number(g).toString(16).toUpperCase().padStart(2, '0');
+    const blue = Number(b).toString(16).toUpperCase().padStart(2, '0');
 
     return `#${red}${green}${blue}`;
   };
@@ -60,6 +80,10 @@ const App = () => {
   };
 
   useEffect(() => {
+    handleRangeDebounced(pendingRgb);
+  }, [pendingRgb, handleRangeDebounced]);
+
+  useEffect(() => {
     const newHex = rgbToHex(rgb.r, rgb.g, rgb.b);
     if (newHex !== hex) {
       setHex(newHex);
@@ -72,6 +96,7 @@ const App = () => {
 
       if (newRgb.r !== rgb.r || newRgb.g !== rgb.g || newRgb.b !== rgb.b) {
         setRgb(newRgb);
+        setPendingRgb(newRgb);
       }
     }
   }, [hex]);
@@ -79,7 +104,7 @@ const App = () => {
   return (
     <div className="app w-full h-screen grid place-items-center text-gray-200 relative">
       <div className="converter w-3/4 max-w-2xl lg:max-w-3xl h-2/3 lg:h-3/5 bg-gray-800 flex flex-col justify-center items-center gap-y-10 rounded-4xl shadow-xl/20">
-        <h1 className="exo px-5 text-3xl text-wrap text-center sm:text-5xl md:text-6xl lg:text-7xl text-gradient lg:mb-4">
+        <h1 className="exo px-5 text-3xl text-wrap text-center sm:text-5xl md:text-6xl lg:text-7xl text-shadow-lg text-shadow-gray-100 lg:mb-4">
           Color Converter
         </h1>
         <div className="rgb-section flex flex-col items-center">
@@ -91,7 +116,7 @@ const App = () => {
               <label className="text-lg sm:text-xl text-red-400">R:</label>
               <div className="inputs flex flex-col justify-center mb-4 lg:mr-6">
                 <input
-                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-md sm:text-lg font-light -ml-2"
+                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-xl lg:text-2xl font-light -ml-2"
                   type="number"
                   name="r"
                   min="0"
@@ -101,15 +126,13 @@ const App = () => {
                   onWheel={(e) => e.currentTarget.blur()}
                 />
                 <input
-                  className="w-30"
+                  className="w-30 h-1"
                   type="range"
                   name="r"
                   min="0"
                   max="255"
                   value={pendingRgb.r}
-                  onChange={handleRgbRangeChange}
-                  onMouseUp={commitRgbRangeChange}
-                  onTouchEnd={commitRgbRangeChange}
+                  onChange={handleRangeImmediate}
                 />
               </div>
             </div>
@@ -117,7 +140,7 @@ const App = () => {
               <label className="text-lg sm:text-xl text-green-400">G:</label>
               <div className="inputs flex flex-col justify-center mb-4 lg:mr-6">
                 <input
-                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-md sm:text-lg font-light -ml-2"
+                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-xl lg:text-2xl font-light -ml-2"
                   type="number"
                   name="g"
                   min="0"
@@ -127,15 +150,13 @@ const App = () => {
                   onWheel={(e) => e.currentTarget.blur()}
                 />
                 <input
-                  className="w-30"
+                  className="w-30 h-1"
                   type="range"
                   name="g"
                   min="0"
                   max="255"
                   value={pendingRgb.g}
-                  onChange={handleRgbRangeChange}
-                  onMouseUp={commitRgbRangeChange}
-                  onTouchEnd={commitRgbRangeChange}
+                  onChange={handleRangeImmediate}
                 />
               </div>
             </div>
@@ -143,7 +164,7 @@ const App = () => {
               <label className="text-lg sm:text-xl text-blue-400">B:</label>
               <div className="inputs flex flex-col justify-center mb-4">
                 <input
-                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-md sm:text-lg font-light -ml-2"
+                  className="w-30 h-8 bg-transparent border-none outline-none text-center text-xl lg:text-2xl font-light -ml-2"
                   type="number"
                   name="b"
                   min="0"
@@ -153,15 +174,13 @@ const App = () => {
                   onWheel={(e) => e.currentTarget.blur()}
                 />
                 <input
-                  className="w-30"
+                  className="w-30 h-1"
                   type="range"
                   name="b"
                   min="0"
                   max="255"
                   value={pendingRgb.b}
-                  onChange={handleRgbRangeChange}
-                  onMouseUp={commitRgbRangeChange}
-                  onTouchEnd={commitRgbRangeChange}
+                  onChange={handleRangeImmediate}
                 />
               </div>
             </div>
@@ -173,18 +192,18 @@ const App = () => {
           </h2>
           <div className="hex-input flex justify-center relative">
             <input
-              className="w-32 lg:w-38  h-10 pl-4 font-light text-xl lg:text-2xl border-b-gray-500 border-b-3"
+              className="w-30 lg:w-36 h-10 pl-4 font-light text-2xl lg:text-3xl border-b-gray-500 border-b-3 outline-none"
               type="text"
               maxLength="7"
               value={hex}
               onChange={handleHexChange}
             />
             <button
-              className="copy-btn absolute right-0 top-0 bg-transparent cursor-pointer focus:outline-none active:outline-none"
+              className="copy-btn absolute right-0 top-1 bg-transparent cursor-pointer"
               onClick={handleCopy}
             >
               {copied ? (
-                <span className="text-xs text-gray-400 absolute -right-8">
+                <span className="text-sm text-gray-400 absolute -right-8">
                   Copied!
                 </span>
               ) : (
